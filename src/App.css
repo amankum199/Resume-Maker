@@ -1,0 +1,207 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f7fafc;
+    color: #2d3748;
+  }
+  
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    min-height: 100vh;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d3748;
+    margin-bottom: 20px;
+  }
+  
+  /* Form Styles */
+  .form-container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 8px;
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    font-size: 0.875rem;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+  }
+  
+  .error-message {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-bottom: 16px;
+  }
+  
+  .profile-pic-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  
+  .profile-pic {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .education-input-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-buttons {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  
+  .submit-button,
+  .reset-button,
+  .download-button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .submit-button {
+    background-color: #4299e1;
+    color: white;
+  }
+  
+  .submit-button:hover {
+    background-color: #3182ce;
+  }
+  
+  .reset-button {
+    background-color: #e53e3e;
+    color: white;
+  }
+  
+  .reset-button:hover {
+    background-color: #c53030;
+  }
+  
+  .download-button {
+    background-color: #48bb78;
+    color: white;
+  }
+  
+  .download-button:hover {
+    background-color: #38a169;
+  }
+  
+  /* Display Section Styles */
+  .display-container {
+    background-color: #2d3748;
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .display-header {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .contact-details {
+    flex: 1;
+  }
+  
+  .display-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  
+  .contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+  }
+  
+  .contact-icon {
+    font-size: 1rem;
+  }
+  
+  .display-details {
+    margin-top: 20px;
+  }
+  
+  .detail-item {
+    font-size: 0.875rem;
+    margin-bottom: 12px;
+  }
+  
+  .education-item {
+    margin-left: 16px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 640px) {
+    .app-title {
+      font-size: 1.5rem;
+    }
+  
+    .display-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .profile-pic-container {
+      margin-bottom: 12px;
+    }
+  
+    .form-buttons {
+      flex-direction: column;
+    }
+  
+    .submit-button,
+    .reset-button,
+    .download-button {
+      width: 100%;
+    }
+  }

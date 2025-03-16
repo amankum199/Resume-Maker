@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable"; // Import jspdf-autotable
 import "./App.css";
 import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaMapMarker } from "react-icons/fa";
 
@@ -192,33 +191,20 @@ function App() {
         addNewPageIfNeeded();
       }
 
-      // Add education in table format (only if not empty)
+      // Add education in simple line format (only if not empty)
       if (submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)) {
         doc.setFontSize(14);
         doc.text("Education:", 20, y);
         y += 10;
-
-        // Prepare data for the table
-        const educationData = submittedData.education
-          .filter((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)
-          .map((edu, index) => [
-            index + 1,
-            edu.school,
-            edu.degree,
-            edu.year,
-            edu.cgpaOrPercentage,
-          ]);
-
-        // Generate the table
-        doc.autoTable({
-          startY: y,
-          head: [["#", "School/University", "Degree", "Year", "CGPA/Percentage"]],
-          body: educationData,
-          theme: "grid",
+        doc.setFontSize(12);
+        submittedData.education.forEach((edu, index) => {
+          if (edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) {
+            const educationLine = `${index + 1}. ${edu.school} - ${edu.degree} (${edu.year}), ${edu.cgpaOrPercentage}`;
+            doc.text(educationLine, 20, y);
+            y += 10;
+            addNewPageIfNeeded();
+          }
         });
-
-        y = doc.lastAutoTable.finalY + 10; // Update y position after the table
-        addNewPageIfNeeded();
       }
 
       // Add experience (only if not empty)
@@ -288,121 +274,102 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Introduction</h1>
+    <div className="app-container">
+      <h1 className="app-title">Create Your Introduction</h1>
 
       {/* Input Form */}
-      <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
-        <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
-        <input type="file" accept="image/*" onChange={handleProfileUpload} className="mb-3" />
-        {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+      <div className="form-container">
+        <label className="form-label">Profile Picture</label>
+        <input type="file" accept="image/*" onChange={handleProfileUpload} className="form-input" />
+        {error && <p className="error-message">{error}</p>}
         {profilePic && (
-          <div className="mt-3 flex justify-center">
-            <img src={profilePic} alt="Profile Preview" className="w-24 h-24 rounded-full object-cover" />
+          <div className="profile-pic-container">
+            <img src={profilePic} alt="Profile Preview" className="profile-pic" />
           </div>
         )}
 
-        <label className="block text-sm font-medium text-gray-700">Name</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
+        <label className="form-label">Name</label>
+        <input type="text" className="form-input" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Profile Summary</label>
-        <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your profile summary" value={profileSummary} onChange={(e) => setProfileSummary(e.target.value)} />
+        <label className="form-label">Profile Summary</label>
+        <textarea className="form-input" placeholder="Enter your profile summary" value={profileSummary} onChange={(e) => setProfileSummary(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Skills</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
+        <label className="form-label">Skills</label>
+        <input type="text" className="form-input" placeholder="Enter your skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Contact</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your contact info" value={contact} onChange={(e) => setContact(e.target.value)} />
+        <label className="form-label">Contact</label>
+        <input type="text" className="form-input" placeholder="Enter your contact info" value={contact} onChange={(e) => setContact(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Email</label>
-        <input type="email" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <label className="form-label">Email</label>
+        <input type="email" className="form-input" placeholder="Enter your email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
-        <input type="date" className="w-full p-2 border border-gray-300 rounded-md mb-3" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
+        <label className="form-label">Date of Birth</label>
+        <input type="date" className="form-input" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Address</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your address" value={address} onChange={(e) => setAddress(e.target.value)} />
+        <label className="form-label">Address</label>
+        <input type="text" className="form-input" placeholder="Enter your address" value={address} onChange={(e) => setAddress(e.target.value)} />
 
-        {/* Education Section in Table Format */}
-        <label className="block text-sm font-medium text-gray-700">Education</label>
-        <table className="w-full border-collapse border border-gray-300 mb-3">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border border-gray-300 p-2">#</th>
-              <th className="border border-gray-300 p-2">School/University</th>
-              <th className="border border-gray-300 p-2">Degree</th>
-              <th className="border border-gray-300 p-2">Year</th>
-              <th className="border border-gray-300 p-2">CGPA/Percentage</th>
-            </tr>
-          </thead>
-          <tbody>
-            {education.map((edu, index) => (
-              <tr key={index}>
-                <td className="border border-gray-300 p-2">{index + 1}</td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded-md"
-                    value={edu.school}
-                    onChange={(e) => handleEducationChange(index, "school", e.target.value)}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded-md"
-                    value={edu.degree}
-                    onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded-md"
-                    value={edu.year}
-                    onChange={(e) => handleEducationChange(index, "year", e.target.value)}
-                  />
-                </td>
-                <td className="border border-gray-300 p-2">
-                  <input
-                    type="text"
-                    className="w-full p-1 border border-gray-300 rounded-md"
-                    value={edu.cgpaOrPercentage}
-                    onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Education Section */}
+        <label className="form-label">Education</label>
+        {education.map((edu, index) => (
+          <div key={index} className="education-input-group">
+            <input
+              type="text"
+              className="form-input"
+              placeholder={`School/University ${index + 1}`}
+              value={edu.school}
+              onChange={(e) => handleEducationChange(index, "school", e.target.value)}
+            />
+            <input
+              type="text"
+              className="form-input"
+              placeholder={`Degree ${index + 1}`}
+              value={edu.degree}
+              onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+            />
+            <input
+              type="text"
+              className="form-input"
+              placeholder={`Year ${index + 1}`}
+              value={edu.year}
+              onChange={(e) => handleEducationChange(index, "year", e.target.value)}
+            />
+            <input
+              type="text"
+              className="form-input"
+              placeholder={`CGPA/Percentage ${index + 1}`}
+              value={edu.cgpaOrPercentage}
+              onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)}
+            />
+          </div>
+        ))}
 
-        {/* Rest of the Form */}
-        <label className="block text-sm font-medium text-gray-700">Experience</label>
-        <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your experience" value={experience} onChange={(e) => setExperience(e.target.value)} />
+        <label className="form-label">Experience</label>
+        <textarea className="form-input" placeholder="Enter your experience" value={experience} onChange={(e) => setExperience(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Hobbies</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your hobbies" value={hobbies} onChange={(e) => setHobbies(e.target.value)} />
+        <label className="form-label">Hobbies</label>
+        <input type="text" className="form-input" placeholder="Enter your hobbies" value={hobbies} onChange={(e) => setHobbies(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Languages</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter languages you know" value={languages} onChange={(e) => setLanguages(e.target.value)} />
+        <label className="form-label">Languages</label>
+        <input type="text" className="form-input" placeholder="Enter languages you know" value={languages} onChange={(e) => setLanguages(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Certifications</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your certifications" value={certifications} onChange={(e) => setCertifications(e.target.value)} />
+        <label className="form-label">Certifications</label>
+        <input type="text" className="form-input" placeholder="Enter your certifications" value={certifications} onChange={(e) => setCertifications(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Projects</label>
-        <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your projects" value={projects} onChange={(e) => setProjects(e.target.value)} />
+        <label className="form-label">Projects</label>
+        <textarea className="form-input" placeholder="Enter your projects" value={projects} onChange={(e) => setProjects(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="LinkedIn URL" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
+        <label className="form-label">LinkedIn</label>
+        <input type="text" className="form-input" placeholder="LinkedIn URL" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">GitHub</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="GitHub URL" value={github} onChange={(e) => setGithub(e.target.value)} />
+        <label className="form-label">GitHub</label>
+        <input type="text" className="form-input" placeholder="GitHub URL" value={github} onChange={(e) => setGithub(e.target.value)} />
 
-        <div className="flex space-x-4">
-          <button className="w-full bg-blue-500 text-white p-2 rounded-md mt-4 hover:bg-blue-600" onClick={handleSubmit}>
+        <div className="form-buttons">
+          <button className="submit-button" onClick={handleSubmit}>
             Submit
           </button>
-          <button className="w-full bg-red-500 text-white p-2 rounded-md mt-4 hover:bg-red-600" onClick={handleReset}>
+          <button className="reset-button" onClick={handleReset}>
             Reset
           </button>
         </div>
@@ -410,42 +377,42 @@ function App() {
 
       {/* Display Section */}
       {submittedData && (
-        <div className="mt-10 bg-gray-800 text-white p-6 rounded-lg w-full max-w-lg">
-          <div className="flex">
+        <div className="display-container">
+          <div className="display-header">
             {/* Left Side: Profile Picture */}
             {submittedData.profilePic && (
-              <div className="w-1/3 flex justify-center">
-                <img src={submittedData.profilePic} alt="Profile" className="w-24 h-24 rounded-full object-cover" />
+              <div className="profile-pic-container">
+                <img src={submittedData.profilePic} alt="Profile" className="profile-pic" />
               </div>
             )}
 
             {/* Right Side: Contact Details */}
-            <div className="w-2/3">
-              <h2 className="text-2xl font-bold">{submittedData.name}</h2>
-              <div className="mt-2 space-y-2">
+            <div className="contact-details">
+              <h2 className="display-name">{submittedData.name}</h2>
+              <div className="contact-info">
                 {submittedData.email && (
-                  <p className="flex items-center">
-                    <FaEnvelope className="mr-2" /> {submittedData.email}
+                  <p className="contact-item">
+                    <FaEnvelope className="contact-icon" /> {submittedData.email}
                   </p>
                 )}
                 {submittedData.contact && (
-                  <p className="flex items-center">
-                    <FaPhone className="mr-2" /> {submittedData.contact}
+                  <p className="contact-item">
+                    <FaPhone className="contact-icon" /> {submittedData.contact}
                   </p>
                 )}
                 {submittedData.address && (
-                  <p className="flex items-center">
-                    <FaMapMarker className="mr-2" /> {submittedData.address}
+                  <p className="contact-item">
+                    <FaMapMarker className="contact-icon" /> {submittedData.address}
                   </p>
                 )}
                 {submittedData.linkedin && (
-                  <a href={submittedData.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-400 hover:text-blue-300">
-                    <FaLinkedin className="mr-2" /> {submittedData.linkedin}
+                  <a href={submittedData.linkedin} target="_blank" rel="noopener noreferrer" className="contact-item">
+                    <FaLinkedin className="contact-icon" /> {submittedData.linkedin}
                   </a>
                 )}
                 {submittedData.github && (
-                  <a href={submittedData.github} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-400 hover:text-blue-300">
-                    <FaGithub className="mr-2" /> {submittedData.github}
+                  <a href={submittedData.github} target="_blank" rel="noopener noreferrer" className="contact-item">
+                    <FaGithub className="contact-icon" /> {submittedData.github}
                   </a>
                 )}
               </div>
@@ -453,48 +420,31 @@ function App() {
           </div>
 
           {/* Rest of the Details */}
-          <div className="mt-6">
-            <p className="mt-2">Date of Birth: {submittedData.dateOfBirth}</p>
-            {submittedData.profileSummary && <p className="mt-2">Profile Summary: {submittedData.profileSummary}</p>}
-            {submittedData.skills && <p className="mt-2">Skills: {submittedData.skills}</p>}
+          <div className="display-details">
+            <p className="detail-item">Date of Birth: {submittedData.dateOfBirth}</p>
+            {submittedData.profileSummary && <p className="detail-item">Profile Summary: {submittedData.profileSummary}</p>}
+            {submittedData.skills && <p className="detail-item">Skills: {submittedData.skills}</p>}
 
-            {/* Education Section in Table Format */}
+            {/* Education Section in Simple Line Format */}
             {submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) && (
               <>
-                <p className="mt-2">Education:</p>
-                <table className="w-full border-collapse border border-gray-300 mt-2">
-                  <thead>
-                    <tr className="bg-gray-700">
-                      <th className="border border-gray-300 p-2">#</th>
-                      <th className="border border-gray-300 p-2">School/University</th>
-                      <th className="border border-gray-300 p-2">Degree</th>
-                      <th className="border border-gray-300 p-2">Year</th>
-                      <th className="border border-gray-300 p-2">CGPA/Percentage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {submittedData.education.map((edu, index) => (
-                      <tr key={index}>
-                        <td className="border border-gray-300 p-2">{index + 1}</td>
-                        <td className="border border-gray-300 p-2">{edu.school}</td>
-                        <td className="border border-gray-300 p-2">{edu.degree}</td>
-                        <td className="border border-gray-300 p-2">{edu.year}</td>
-                        <td className="border border-gray-300 p-2">{edu.cgpaOrPercentage}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <p className="detail-item">Education:</p>
+                {submittedData.education.map((edu, index) => (
+                  <div key={index} className="education-item">
+                    <p>{index + 1}. {edu.school} - {edu.degree} ({edu.year}), {edu.cgpaOrPercentage}</p>
+                  </div>
+                ))}
               </>
             )}
 
-            {submittedData.experience && <p className="mt-2">Experience: {submittedData.experience}</p>}
-            {submittedData.hobbies && <p className="mt-2">Hobbies: {submittedData.hobbies}</p>}
-            {submittedData.languages && <p className="mt-2">Languages: {submittedData.languages}</p>}
-            {submittedData.certifications && <p className="mt-2">Certifications: {submittedData.certifications}</p>}
-            {submittedData.projects && <p className="mt-2">Projects: {submittedData.projects}</p>}
+            {submittedData.experience && <p className="detail-item">Experience: {submittedData.experience}</p>}
+            {submittedData.hobbies && <p className="detail-item">Hobbies: {submittedData.hobbies}</p>}
+            {submittedData.languages && <p className="detail-item">Languages: {submittedData.languages}</p>}
+            {submittedData.certifications && <p className="detail-item">Certifications: {submittedData.certifications}</p>}
+            {submittedData.projects && <p className="detail-item">Projects: {submittedData.projects}</p>}
           </div>
 
-          <button className="mt-4 bg-green-500 p-2 rounded-md hover:bg-green-600" onClick={handleDownloadPDF}>
+          <button className="download-button" onClick={handleDownloadPDF}>
             Download as PDF
           </button>
         </div>
