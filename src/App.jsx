@@ -81,7 +81,7 @@ function App() {
     const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text("My Introduction", 20, 20);
+    doc.text("Resume", 20, 20);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(14);
