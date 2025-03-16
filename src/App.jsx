@@ -6,15 +6,17 @@ import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaMapMarker } from "react-ic
 function App() {
   // State for user input
   const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+  const [profileSummary, setProfileSummary] = useState("");
   const [skills, setSkills] = useState("");
   const [contact, setContact] = useState("");
   const [email, setEmail] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
-  const [tenth, setTenth] = useState("");
-  const [twelfth, setTwelfth] = useState("");
-  const [graduation, setGraduation] = useState("");
+  const [education, setEducation] = useState([
+    { school: "", year: "", percentage: "" },
+    { school: "", year: "", percentage: "" },
+    { school: "", year: "", percentage: "" },
+  ]);
   const [experience, setExperience] = useState("");
   const [hobbies, setHobbies] = useState("");
   const [languages, setLanguages] = useState("");
@@ -45,39 +47,17 @@ function App() {
     }
   };
 
-  // Calculate age from date of birth
-  const calculateAge = (dateOfBirth) => {
-    const dob = new Date(dateOfBirth);
-    const today = new Date();
-    if (dob > today) {
-      setError("Date of birth cannot be in the future.");
-      return null;
-    }
-    let age = today.getFullYear() - dob.getFullYear();
-    const monthDifference = today.getMonth() - dob.getMonth();
-    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < dob.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   // Handle form submission
   const handleSubmit = () => {
-    const age = calculateAge(dateOfBirth);
-    if (age === null) return;
-
     setSubmittedData({
       name,
-      bio,
+      profileSummary,
       skills,
       contact,
       email,
       dateOfBirth,
-      age,
       address,
-      tenth,
-      twelfth,
-      graduation,
+      education,
       experience,
       hobbies,
       languages,
@@ -93,15 +73,17 @@ function App() {
   // Reset form
   const handleReset = () => {
     setName("");
-    setBio("");
+    setProfileSummary("");
     setSkills("");
     setContact("");
     setEmail("");
     setDateOfBirth("");
     setAddress("");
-    setTenth("");
-    setTwelfth("");
-    setGraduation("");
+    setEducation([
+      { school: "", year: "", percentage: "" },
+      { school: "", year: "", percentage: "" },
+      { school: "", year: "", percentage: "" },
+    ]);
     setExperience("");
     setHobbies("");
     setLanguages("");
@@ -114,6 +96,13 @@ function App() {
     setError("");
   };
 
+  // Handle education input change
+  const handleEducationChange = (index, field, value) => {
+    const updatedEducation = [...education];
+    updatedEducation[index][field] = value;
+    setEducation(updatedEducation);
+  };
+
   // Generate and download PDF
   const handleDownloadPDF = () => {
     if (!submittedData) return;
@@ -123,49 +112,119 @@ function App() {
     doc.setFontSize(22);
     doc.text("My Introduction", 20, 20);
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(14);
-    let y = 40;
-    doc.text(`Name: ${submittedData.name}`, 20, y);
-    y += 10;
-    doc.text(`Date of Birth: ${submittedData.dateOfBirth}`, 20, y);
-    y += 10;
-    doc.text(`Age: ${submittedData.age}`, 20, y);
-    y += 10;
-    doc.text(`Address: ${submittedData.address}`, 20, y);
-    y += 10;
-    doc.text(`Contact: ${submittedData.contact}`, 20, y);
-    y += 10;
-    doc.text(`Email: ${submittedData.email}`, 20, y);
-    y += 15;
-    doc.text(`Bio: ${submittedData.bio}`, 20, y);
-    y += 15;
-    doc.text(`Skills: ${submittedData.skills}`, 20, y);
-    y += 15;
-    doc.text(`10th Grade: ${submittedData.tenth}`, 20, y);
-    y += 10;
-    doc.text(`12th Grade: ${submittedData.twelfth}`, 20, y);
-    y += 10;
-    doc.text(`Graduation: ${submittedData.graduation}`, 20, y);
-    y += 15;
-    doc.text(`Experience: ${submittedData.experience}`, 20, y);
-    y += 15;
-    doc.text(`Hobbies: ${submittedData.hobbies}`, 20, y);
-    y += 10;
-    doc.text(`Languages: ${submittedData.languages}`, 20, y);
-    y += 10;
-    doc.text(`Certifications: ${submittedData.certifications}`, 20, y);
-    y += 10;
-    doc.text(`Projects: ${submittedData.projects}`, 20, y);
-    y += 10;
-    doc.text(`LinkedIn: ${submittedData.linkedin}`, 20, y);
-    y += 10;
-    doc.text(`GitHub: ${submittedData.github}`, 20, y);
-
+    // Add profile picture to PDF
     if (submittedData.profilePic) {
-      doc.addImage(submittedData.profilePic, "JPEG", 150, 20, 40, 40);
+      doc.addImage(submittedData.profilePic, "JPEG", 20, 30, 40, 40);
     }
 
+    // Add name and contact details
+    doc.setFontSize(16);
+    doc.text(submittedData.name, 70, 40);
+    doc.setFontSize(12);
+    let y = 50;
+    if (submittedData.email) {
+      doc.text(`Email: ${submittedData.email}`, 70, y);
+      y += 10;
+    }
+    if (submittedData.contact) {
+      doc.text(`Contact: ${submittedData.contact}`, 70, y);
+      y += 10;
+    }
+    if (submittedData.address) {
+      doc.text(`Address: ${submittedData.address}`, 70, y);
+      y += 10;
+    }
+    if (submittedData.linkedin) {
+      doc.setTextColor(0, 0, 255);
+      doc.textWithLink(`LinkedIn: ${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
+      doc.setTextColor(0, 0, 0);
+      y += 10;
+    }
+    if (submittedData.github) {
+      doc.setTextColor(0, 0, 255);
+      doc.textWithLink(`GitHub: ${submittedData.github}`, 70, y, { url: submittedData.github });
+      doc.setTextColor(0, 0, 0);
+      y += 10;
+    }
+
+    // Add a horizontal line
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.line(20, y, 190, y);
+    y += 10;
+
+    // Add profile summary
+    doc.setFontSize(14);
+    doc.text("Profile Summary:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.profileSummary, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add skills
+    doc.setFontSize(14);
+    doc.text("Skills:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.skills, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add education
+    doc.setFontSize(14);
+    doc.text("Education:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    submittedData.education.forEach((edu, index) => {
+      if (edu.school || edu.year || edu.percentage) {
+        doc.text(`  ${index + 1}. School/University: ${edu.school}`, 20, y);
+        y += 10;
+        doc.text(`     Year: ${edu.year}`, 20, y);
+        y += 10;
+        doc.text(`     Percentage: ${edu.percentage}`, 20, y);
+        y += 10;
+      }
+    });
+
+    // Add experience
+    doc.setFontSize(14);
+    doc.text("Experience:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.experience, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add hobbies
+    doc.setFontSize(14);
+    doc.text("Hobbies:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.hobbies, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add languages
+    doc.setFontSize(14);
+    doc.text("Languages:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.languages, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add certifications
+    doc.setFontSize(14);
+    doc.text("Certifications:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.certifications, 20, y, { maxWidth: 170 });
+    y += 20;
+
+    // Add projects
+    doc.setFontSize(14);
+    doc.text("Projects:", 20, y);
+    y += 10;
+    doc.setFontSize(12);
+    doc.text(submittedData.projects, 20, y, { maxWidth: 170 });
+
+    // Save the PDF
     doc.save("My_Introduction.pdf");
   };
 
@@ -187,8 +246,8 @@ function App() {
         <label className="block text-sm font-medium text-gray-700">Name</label>
         <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Bio</label>
-        <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your bio" value={bio} onChange={(e) => setBio(e.target.value)} />
+        <label className="block text-sm font-medium text-gray-700">Profile Summary</label>
+        <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your profile summary" value={profileSummary} onChange={(e) => setProfileSummary(e.target.value)} />
 
         <label className="block text-sm font-medium text-gray-700">Skills</label>
         <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
@@ -205,14 +264,15 @@ function App() {
         <label className="block text-sm font-medium text-gray-700">Address</label>
         <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your address" value={address} onChange={(e) => setAddress(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">10th Grade</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="School & Year" value={tenth} onChange={(e) => setTenth(e.target.value)} />
-
-        <label className="block text-sm font-medium text-gray-700">12th Grade</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="School & Year" value={twelfth} onChange={(e) => setTwelfth(e.target.value)} />
-
-        <label className="block text-sm font-medium text-gray-700">Graduation</label>
-        <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Degree & University" value={graduation} onChange={(e) => setGraduation(e.target.value)} />
+        {/* Education Section */}
+        <label className="block text-sm font-medium text-gray-700">Education</label>
+        {education.map((edu, index) => (
+          <div key={index} className="mb-3">
+            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`School/University ${index + 1}`} value={edu.school} onChange={(e) => handleEducationChange(index, "school", e.target.value)} />
+            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`Year ${index + 1}`} value={edu.year} onChange={(e) => handleEducationChange(index, "year", e.target.value)} />
+            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`Percentage ${index + 1}`} value={edu.percentage} onChange={(e) => handleEducationChange(index, "percentage", e.target.value)} />
+          </div>
+        ))}
 
         <label className="block text-sm font-medium text-gray-700">Experience</label>
         <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your experience" value={experience} onChange={(e) => setExperience(e.target.value)} />
@@ -292,12 +352,19 @@ function App() {
           {/* Rest of the Details */}
           <div className="mt-6">
             <p className="mt-2">Date of Birth: {submittedData.dateOfBirth}</p>
-            <p className="mt-2">Age: {submittedData.age}</p>
-            <p className="mt-2">Bio: {submittedData.bio}</p>
+            <p className="mt-2">Profile Summary: {submittedData.profileSummary}</p>
             <p className="mt-2">Skills: {submittedData.skills}</p>
-            <p className="mt-2">10th Grade: {submittedData.tenth}</p>
-            <p className="mt-2">12th Grade: {submittedData.twelfth}</p>
-            <p className="mt-2">Graduation: {submittedData.graduation}</p>
+
+            {/* Education Section */}
+            <p className="mt-2">Education:</p>
+            {submittedData.education.map((edu, index) => (
+              <div key={index} className="ml-4">
+                <p>  {index + 1}. School/University: {edu.school}</p>
+                <p>     Year: {edu.year}</p>
+                <p>     Percentage: {edu.percentage}</p>
+              </div>
+            ))}
+
             <p className="mt-2">Experience: {submittedData.experience}</p>
             <p className="mt-2">Hobbies: {submittedData.hobbies}</p>
             <p className="mt-2">Languages: {submittedData.languages}</p>
