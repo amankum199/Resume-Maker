@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { jsPDF } from "jspdf";
+import "jspdf-autotable"; // Import jspdf-autotable
 import "./App.css";
-import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaMapMarker } from "react-icons/fa"; // Import icons
+import { FaLinkedin, FaGithub, FaEnvelope, FaPhone, FaMapMarker } from "react-icons/fa";
 
 function App() {
   // State for user input
@@ -110,6 +111,14 @@ function App() {
     const doc = new jsPDF();
     let y = 20; // Vertical position for content
 
+    // Function to add a new page if content overflows
+    const addNewPageIfNeeded = () => {
+      if (y > 280) {
+        doc.addPage();
+        y = 20; // Reset y position for the new page
+      }
+    };
+
     // Add profile picture to PDF
     if (submittedData.profilePic) {
       doc.addImage(submittedData.profilePic, "JPEG", 20, y, 40, 40);
@@ -121,28 +130,28 @@ function App() {
     doc.setFontSize(12);
     y += 20;
 
-    // Add email, contact, address, LinkedIn, and GitHub with icons
+    // Add email, contact, address, LinkedIn, and GitHub without icons or labels
     if (submittedData.email) {
-      doc.text(`📧 ${submittedData.email}`, 70, y);
+      doc.text(`${submittedData.email}`, 70, y);
       y += 10;
     }
     if (submittedData.contact) {
-      doc.text(`📞 ${submittedData.contact}`, 70, y);
+      doc.text(`${submittedData.contact}`, 70, y);
       y += 10;
     }
     if (submittedData.address) {
-      doc.text(`📍 ${submittedData.address}`, 70, y);
+      doc.text(`${submittedData.address}`, 70, y);
       y += 10;
     }
     if (submittedData.linkedin) {
       doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`🔗 ${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
+      doc.textWithLink(`${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
       doc.setTextColor(0, 0, 0);
       y += 10;
     }
     if (submittedData.github) {
       doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`🐙 ${submittedData.github}`, 70, y, { url: submittedData.github });
+      doc.textWithLink(`${submittedData.github}`, 70, y, { url: submittedData.github });
       doc.setTextColor(0, 0, 0);
       y += 10;
     }
@@ -162,6 +171,7 @@ function App() {
       const profileSummaryLines = doc.splitTextToSize(submittedData.profileSummary, 170);
       doc.text(profileSummaryLines, 20, y);
       y += profileSummaryLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
     // Add skills (only if not empty)
@@ -173,26 +183,36 @@ function App() {
       const skillsLines = doc.splitTextToSize(submittedData.skills, 170);
       doc.text(skillsLines, 20, y);
       y += skillsLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
-    // Add education (only if not empty)
+    // Add education in table format (only if not empty)
     if (submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)) {
       doc.setFontSize(14);
       doc.text("Education:", 20, y);
       y += 10;
-      doc.setFontSize(12);
-      submittedData.education.forEach((edu, index) => {
-        if (edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) {
-          doc.text(`  ${index + 1}. School/University: ${edu.school}`, 20, y);
-          y += 10;
-          doc.text(`     Degree: ${edu.degree}`, 20, y);
-          y += 10;
-          doc.text(`     Year: ${edu.year}`, 20, y);
-          y += 10;
-          doc.text(`     CGPA/Percentage: ${edu.cgpaOrPercentage}`, 20, y);
-          y += 10;
-        }
+
+      // Prepare data for the table
+      const educationData = submittedData.education
+        .filter((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)
+        .map((edu, index) => [
+          index + 1,
+          edu.school,
+          edu.degree,
+          edu.year,
+          edu.cgpaOrPercentage,
+        ]);
+
+      // Generate the table
+      doc.autoTable({
+        startY: y,
+        head: [["#", "School/University", "Degree", "Year", "CGPA/Percentage"]],
+        body: educationData,
+        theme: "grid",
       });
+
+      y = doc.lastAutoTable.finalY + 10; // Update y position after the table
+      addNewPageIfNeeded();
     }
 
     // Add experience (only if not empty)
@@ -204,6 +224,7 @@ function App() {
       const experienceLines = doc.splitTextToSize(submittedData.experience, 170);
       doc.text(experienceLines, 20, y);
       y += experienceLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
     // Add hobbies (only if not empty)
@@ -215,6 +236,7 @@ function App() {
       const hobbiesLines = doc.splitTextToSize(submittedData.hobbies, 170);
       doc.text(hobbiesLines, 20, y);
       y += hobbiesLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
     // Add languages (only if not empty)
@@ -226,6 +248,7 @@ function App() {
       const languagesLines = doc.splitTextToSize(submittedData.languages, 170);
       doc.text(languagesLines, 20, y);
       y += languagesLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
     // Add certifications (only if not empty)
@@ -237,6 +260,7 @@ function App() {
       const certificationsLines = doc.splitTextToSize(submittedData.certifications, 170);
       doc.text(certificationsLines, 20, y);
       y += certificationsLines.length * 7 + 10;
+      addNewPageIfNeeded();
     }
 
     // Add projects (only if not empty)
@@ -249,19 +273,13 @@ function App() {
       doc.text(projectsLines, 20, y);
     }
 
-    // Add new page if content overflows
-    if (y > 280) {
-      doc.addPage();
-      y = 20; // Reset y position for the new page
-    }
-
     // Save the PDF
-    doc.save("Resume.pdf");
+    doc.save("Introduction.pdf");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Resume</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Introduction</h1>
 
       {/* Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
@@ -295,41 +313,60 @@ function App() {
         <label className="block text-sm font-medium text-gray-700">Address</label>
         <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your address" value={address} onChange={(e) => setAddress(e.target.value)} />
 
-        {/* Education Section */}
+        {/* Education Section in Table Format */}
         <label className="block text-sm font-medium text-gray-700">Education</label>
-        {education.map((edu, index) => (
-          <div key={index} className="mb-3">
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-              placeholder={`School/University ${index + 1}`}
-              value={edu.school}
-              onChange={(e) => handleEducationChange(index, "school", e.target.value)}
-            />
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-              placeholder={`Degree ${index + 1}`}
-              value={edu.degree}
-              onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
-            />
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-              placeholder={`Year ${index + 1}`}
-              value={edu.year}
-              onChange={(e) => handleEducationChange(index, "year", e.target.value)}
-            />
-            <input
-              type="text"
-              className="w-full p-2 border border-gray-300 rounded-md mb-2"
-              placeholder={`CGPA/Percentage ${index + 1}`}
-              value={edu.cgpaOrPercentage}
-              onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)}
-            />
-          </div>
-        ))}
+        <table className="w-full border-collapse border border-gray-300 mb-3">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="border border-gray-300 p-2">#</th>
+              <th className="border border-gray-300 p-2">School/University</th>
+              <th className="border border-gray-300 p-2">Degree</th>
+              <th className="border border-gray-300 p-2">Year</th>
+              <th className="border border-gray-300 p-2">CGPA/Percentage</th>
+            </tr>
+          </thead>
+          <tbody>
+            {education.map((edu, index) => (
+              <tr key={index}>
+                <td className="border border-gray-300 p-2">{index + 1}</td>
+                <td className="border border-gray-300 p-2">
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded-md"
+                    value={edu.school}
+                    onChange={(e) => handleEducationChange(index, "school", e.target.value)}
+                  />
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded-md"
+                    value={edu.degree}
+                    onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+                  />
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded-md"
+                    value={edu.year}
+                    onChange={(e) => handleEducationChange(index, "year", e.target.value)}
+                  />
+                </td>
+                <td className="border border-gray-300 p-2">
+                  <input
+                    type="text"
+                    className="w-full p-1 border border-gray-300 rounded-md"
+                    value={edu.cgpaOrPercentage}
+                    onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
+        {/* Rest of the Form */}
         <label className="block text-sm font-medium text-gray-700">Experience</label>
         <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your experience" value={experience} onChange={(e) => setExperience(e.target.value)} />
 
@@ -411,18 +448,32 @@ function App() {
             {submittedData.profileSummary && <p className="mt-2">Profile Summary: {submittedData.profileSummary}</p>}
             {submittedData.skills && <p className="mt-2">Skills: {submittedData.skills}</p>}
 
-            {/* Education Section */}
+            {/* Education Section in Table Format */}
             {submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) && (
               <>
                 <p className="mt-2">Education:</p>
-                {submittedData.education.map((edu, index) => (
-                  <div key={index} className="ml-4">
-                    <p>  {index + 1}. School/University: {edu.school}</p>
-                    <p>     Degree: {edu.degree}</p>
-                    <p>     Year: {edu.year}</p>
-                    <p>     CGPA/Percentage: {edu.cgpaOrPercentage}</p>
-                  </div>
-                ))}
+                <table className="w-full border-collapse border border-gray-300 mt-2">
+                  <thead>
+                    <tr className="bg-gray-700">
+                      <th className="border border-gray-300 p-2">#</th>
+                      <th className="border border-gray-300 p-2">School/University</th>
+                      <th className="border border-gray-300 p-2">Degree</th>
+                      <th className="border border-gray-300 p-2">Year</th>
+                      <th className="border border-gray-300 p-2">CGPA/Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {submittedData.education.map((edu, index) => (
+                      <tr key={index}>
+                        <td className="border border-gray-300 p-2">{index + 1}</td>
+                        <td className="border border-gray-300 p-2">{edu.school}</td>
+                        <td className="border border-gray-300 p-2">{edu.degree}</td>
+                        <td className="border border-gray-300 p-2">{edu.year}</td>
+                        <td className="border border-gray-300 p-2">{edu.cgpaOrPercentage}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </>
             )}
 
