@@ -13,9 +13,9 @@ function App() {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
   const [education, setEducation] = useState([
-    { school: "", year: "", percentage: "" },
-    { school: "", year: "", percentage: "" },
-    { school: "", year: "", percentage: "" },
+    { school: "", year: "", cgpaOrPercentage: "" },
+    { school: "", year: "", cgpaOrPercentage: "" },
+    { school: "", year: "", cgpaOrPercentage: "" },
   ]);
   const [experience, setExperience] = useState("");
   const [hobbies, setHobbies] = useState("");
@@ -80,9 +80,9 @@ function App() {
     setDateOfBirth("");
     setAddress("");
     setEducation([
-      { school: "", year: "", percentage: "" },
-      { school: "", year: "", percentage: "" },
-      { school: "", year: "", percentage: "" },
+      { school: "", year: "", cgpaOrPercentage: "" },
+      { school: "", year: "", cgpaOrPercentage: "" },
+      { school: "", year: "", cgpaOrPercentage: "" },
     ]);
     setExperience("");
     setHobbies("");
@@ -108,41 +108,41 @@ function App() {
     if (!submittedData) return;
 
     const doc = new jsPDF();
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
-    doc.text("My Introduction", 20, 20);
+    let y = 20; // Vertical position for content
 
     // Add profile picture to PDF
     if (submittedData.profilePic) {
-      doc.addImage(submittedData.profilePic, "JPEG", 20, 30, 40, 40);
+      doc.addImage(submittedData.profilePic, "JPEG", 20, y, 40, 40);
     }
 
     // Add name and contact details
     doc.setFontSize(16);
-    doc.text(submittedData.name, 70, 40);
+    doc.text(submittedData.name, 70, y + 10);
     doc.setFontSize(12);
-    let y = 50;
+    y += 20;
+
+    // Add email, contact, address, LinkedIn, and GitHub with icons
     if (submittedData.email) {
-      doc.text(`Email: ${submittedData.email}`, 70, y);
+      doc.text(`📧 ${submittedData.email}`, 70, y);
       y += 10;
     }
     if (submittedData.contact) {
-      doc.text(`Contact: ${submittedData.contact}`, 70, y);
+      doc.text(`📞 ${submittedData.contact}`, 70, y);
       y += 10;
     }
     if (submittedData.address) {
-      doc.text(`Address: ${submittedData.address}`, 70, y);
+      doc.text(`📍 ${submittedData.address}`, 70, y);
       y += 10;
     }
     if (submittedData.linkedin) {
       doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`LinkedIn: ${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
+      doc.textWithLink(`🔗 ${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
       doc.setTextColor(0, 0, 0);
       y += 10;
     }
     if (submittedData.github) {
       doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`GitHub: ${submittedData.github}`, 70, y, { url: submittedData.github });
+      doc.textWithLink(`🐙 ${submittedData.github}`, 70, y, { url: submittedData.github });
       doc.setTextColor(0, 0, 0);
       y += 10;
     }
@@ -154,78 +154,107 @@ function App() {
     y += 10;
 
     // Add profile summary
-    doc.setFontSize(14);
-    doc.text("Profile Summary:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.profileSummary, 20, y, { maxWidth: 170 });
-    y += 20;
+    if (submittedData.profileSummary) {
+      doc.setFontSize(14);
+      doc.text("Profile Summary:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const profileSummaryLines = doc.splitTextToSize(submittedData.profileSummary, 170);
+      doc.text(profileSummaryLines, 20, y);
+      y += profileSummaryLines.length * 7 + 10;
+    }
 
     // Add skills
-    doc.setFontSize(14);
-    doc.text("Skills:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.skills, 20, y, { maxWidth: 170 });
-    y += 20;
+    if (submittedData.skills) {
+      doc.setFontSize(14);
+      doc.text("Skills:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const skillsLines = doc.splitTextToSize(submittedData.skills, 170);
+      doc.text(skillsLines, 20, y);
+      y += skillsLines.length * 7 + 10;
+    }
 
     // Add education
-    doc.setFontSize(14);
-    doc.text("Education:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    submittedData.education.forEach((edu, index) => {
-      if (edu.school || edu.year || edu.percentage) {
-        doc.text(`  ${index + 1}. School/University: ${edu.school}`, 20, y);
-        y += 10;
-        doc.text(`     Year: ${edu.year}`, 20, y);
-        y += 10;
-        doc.text(`     Percentage: ${edu.percentage}`, 20, y);
-        y += 10;
-      }
-    });
+    if (submittedData.education.some((edu) => edu.school || edu.year || edu.cgpaOrPercentage)) {
+      doc.setFontSize(14);
+      doc.text("Education:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      submittedData.education.forEach((edu, index) => {
+        if (edu.school || edu.year || edu.cgpaOrPercentage) {
+          doc.text(`  ${index + 1}. School/University: ${edu.school}`, 20, y);
+          y += 10;
+          doc.text(`     Year: ${edu.year}`, 20, y);
+          y += 10;
+          doc.text(`     CGPA/Percentage: ${edu.cgpaOrPercentage}`, 20, y);
+          y += 10;
+        }
+      });
+    }
 
-    // Add experience
-    doc.setFontSize(14);
-    doc.text("Experience:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.experience, 20, y, { maxWidth: 170 });
-    y += 20;
+    // Add experience (only if not empty)
+    if (submittedData.experience) {
+      doc.setFontSize(14);
+      doc.text("Experience:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const experienceLines = doc.splitTextToSize(submittedData.experience, 170);
+      doc.text(experienceLines, 20, y);
+      y += experienceLines.length * 7 + 10;
+    }
 
-    // Add hobbies
-    doc.setFontSize(14);
-    doc.text("Hobbies:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.hobbies, 20, y, { maxWidth: 170 });
-    y += 20;
+    // Add hobbies (only if not empty)
+    if (submittedData.hobbies) {
+      doc.setFontSize(14);
+      doc.text("Hobbies:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const hobbiesLines = doc.splitTextToSize(submittedData.hobbies, 170);
+      doc.text(hobbiesLines, 20, y);
+      y += hobbiesLines.length * 7 + 10;
+    }
 
-    // Add languages
-    doc.setFontSize(14);
-    doc.text("Languages:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.languages, 20, y, { maxWidth: 170 });
-    y += 20;
+    // Add languages (only if not empty)
+    if (submittedData.languages) {
+      doc.setFontSize(14);
+      doc.text("Languages:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const languagesLines = doc.splitTextToSize(submittedData.languages, 170);
+      doc.text(languagesLines, 20, y);
+      y += languagesLines.length * 7 + 10;
+    }
 
-    // Add certifications
-    doc.setFontSize(14);
-    doc.text("Certifications:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.certifications, 20, y, { maxWidth: 170 });
-    y += 20;
+    // Add certifications (only if not empty)
+    if (submittedData.certifications) {
+      doc.setFontSize(14);
+      doc.text("Certifications:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const certificationsLines = doc.splitTextToSize(submittedData.certifications, 170);
+      doc.text(certificationsLines, 20, y);
+      y += certificationsLines.length * 7 + 10;
+    }
 
-    // Add projects
-    doc.setFontSize(14);
-    doc.text("Projects:", 20, y);
-    y += 10;
-    doc.setFontSize(12);
-    doc.text(submittedData.projects, 20, y, { maxWidth: 170 });
+    // Add projects (only if not empty)
+    if (submittedData.projects) {
+      doc.setFontSize(14);
+      doc.text("Projects:", 20, y);
+      y += 10;
+      doc.setFontSize(12);
+      const projectsLines = doc.splitTextToSize(submittedData.projects, 170);
+      doc.text(projectsLines, 20, y);
+    }
+
+    // Add new page if content overflows
+    if (y > 280) {
+      doc.addPage();
+      y = 20; // Reset y position for the new page
+    }
 
     // Save the PDF
-    doc.save("My_Introduction.pdf");
+    doc.save("Introduction.pdf");
   };
 
   return (
@@ -270,7 +299,7 @@ function App() {
           <div key={index} className="mb-3">
             <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`School/University ${index + 1}`} value={edu.school} onChange={(e) => handleEducationChange(index, "school", e.target.value)} />
             <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`Year ${index + 1}`} value={edu.year} onChange={(e) => handleEducationChange(index, "year", e.target.value)} />
-            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`Percentage ${index + 1}`} value={edu.percentage} onChange={(e) => handleEducationChange(index, "percentage", e.target.value)} />
+            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`CGPA/Percentage ${index + 1}`} value={edu.cgpaOrPercentage} onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)} />
           </div>
         ))}
 
@@ -337,12 +366,12 @@ function App() {
                 )}
                 {submittedData.linkedin && (
                   <a href={submittedData.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-400 hover:text-blue-300">
-                    <FaLinkedin className="mr-2" /> LinkedIn
+                    <FaLinkedin className="mr-2" /> {submittedData.linkedin}
                   </a>
                 )}
                 {submittedData.github && (
                   <a href={submittedData.github} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-400 hover:text-blue-300">
-                    <FaGithub className="mr-2" /> GitHub
+                    <FaGithub className="mr-2" /> {submittedData.github}
                   </a>
                 )}
               </div>
@@ -352,24 +381,28 @@ function App() {
           {/* Rest of the Details */}
           <div className="mt-6">
             <p className="mt-2">Date of Birth: {submittedData.dateOfBirth}</p>
-            <p className="mt-2">Profile Summary: {submittedData.profileSummary}</p>
-            <p className="mt-2">Skills: {submittedData.skills}</p>
+            {submittedData.profileSummary && <p className="mt-2">Profile Summary: {submittedData.profileSummary}</p>}
+            {submittedData.skills && <p className="mt-2">Skills: {submittedData.skills}</p>}
 
             {/* Education Section */}
-            <p className="mt-2">Education:</p>
-            {submittedData.education.map((edu, index) => (
-              <div key={index} className="ml-4">
-                <p>  {index + 1}. School/University: {edu.school}</p>
-                <p>     Year: {edu.year}</p>
-                <p>     Percentage: {edu.percentage}</p>
-              </div>
-            ))}
+            {submittedData.education.some((edu) => edu.school || edu.year || edu.cgpaOrPercentage) && (
+              <>
+                <p className="mt-2">Education:</p>
+                {submittedData.education.map((edu, index) => (
+                  <div key={index} className="ml-4">
+                    <p>  {index + 1}. School/University: {edu.school}</p>
+                    <p>     Year: {edu.year}</p>
+                    <p>     CGPA/Percentage: {edu.cgpaOrPercentage}</p>
+                  </div>
+                ))}
+              </>
+            )}
 
-            <p className="mt-2">Experience: {submittedData.experience}</p>
-            <p className="mt-2">Hobbies: {submittedData.hobbies}</p>
-            <p className="mt-2">Languages: {submittedData.languages}</p>
-            <p className="mt-2">Certifications: {submittedData.certifications}</p>
-            <p className="mt-2">Projects: {submittedData.projects}</p>
+            {submittedData.experience && <p className="mt-2">Experience: {submittedData.experience}</p>}
+            {submittedData.hobbies && <p className="mt-2">Hobbies: {submittedData.hobbies}</p>}
+            {submittedData.languages && <p className="mt-2">Languages: {submittedData.languages}</p>}
+            {submittedData.certifications && <p className="mt-2">Certifications: {submittedData.certifications}</p>}
+            {submittedData.projects && <p className="mt-2">Projects: {submittedData.projects}</p>}
           </div>
 
           <button className="mt-4 bg-green-500 p-2 rounded-md hover:bg-green-600" onClick={handleDownloadPDF}>
