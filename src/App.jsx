@@ -81,7 +81,7 @@ function App() {
     const doc = new jsPDF();
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text("Resume", 20, 20);
+    doc.text("My Introduction", 20, 20);
 
     doc.setFont("helvetica", "normal");
     doc.setFontSize(14);
@@ -90,7 +90,7 @@ function App() {
     doc.text(`Age: ${submittedData.age}`, 20, 60);
     doc.text(`Address: ${submittedData.address}`, 20, 70);
     doc.text(`Contact: ${submittedData.contact}`, 20, 80);
-    doc.text(`Bio: ${submittedData.bio}`, 20, 95);
+    doc.text(`Profile Summary: ${submittedData.bio}`, 20, 95);
     doc.text(`Skills: ${submittedData.skills}`, 20, 110);
     doc.text(`10th Grade: ${submittedData.tenth}`, 20, 125);
     doc.text(`12th Grade: ${submittedData.twelfth}`, 20, 135);
@@ -107,12 +107,12 @@ function App() {
       doc.addImage(submittedData.profilePic, "JPEG", 150, 20, 40, 40);
     }
 
-    doc.save("My_Introduction.pdf");
+    doc.save("My_Resume.pdf");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Resume</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Introduction</h1>
 
       {/* Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
@@ -127,7 +127,7 @@ function App() {
         <label className="block text-sm font-medium text-gray-700">Name</label>
         <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your name" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <label className="block text-sm font-medium text-gray-700">Bio</label>
+        <label className="block text-sm font-medium text-gray-700">Profile Summary</label>
         <textarea className="w-full p-2 border border-gray-300 rounded-md mb-3" placeholder="Enter your bio" value={bio} onChange={(e) => setBio(e.target.value)} />
 
         <label className="block text-sm font-medium text-gray-700">Skills</label>
@@ -180,13 +180,30 @@ function App() {
       {/* Display Section */}
       {submittedData && (
         <div className="mt-10 bg-gray-800 text-white p-6 rounded-lg w-full max-w-lg text-center">
-          {submittedData.profilePic && <img src={submittedData.profilePic} alt="Profile" className="w-24 h-24 mx-auto rounded-full mb-4" />}
+          {submittedData.profilePic && (
+            <img src={submittedData.profilePic} alt="Profile" className="w-24 h-24 mx-auto rounded-full mb-4" />
+          )}
           <h2 className="text-2xl font-bold">{submittedData.name}</h2>
+
+          {/* LinkedIn and GitHub Links */}
+          <div className="mt-2 flex justify-center space-x-4">
+            {submittedData.linkedin && (
+              <a href={submittedData.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                LinkedIn
+              </a>
+            )}
+            {submittedData.github && (
+              <a href={submittedData.github} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300">
+                GitHub
+              </a>
+            )}
+          </div>
+
           <p className="mt-2">Date of Birth: {submittedData.dateOfBirth}</p>
           <p className="mt-2">Age: {submittedData.age}</p>
           <p className="mt-2">Address: {submittedData.address}</p>
           <p className="mt-2">Contact: {submittedData.contact}</p>
-          <p className="mt-2">Bio: {submittedData.bio}</p>
+          <p className="mt-2">Profile Summary: {submittedData.bio}</p>
           <p className="mt-2">Skills: {submittedData.skills}</p>
           <p className="mt-2">10th Grade: {submittedData.tenth}</p>
           <p className="mt-2">12th Grade: {submittedData.twelfth}</p>
@@ -196,8 +213,6 @@ function App() {
           <p className="mt-2">Languages: {submittedData.languages}</p>
           <p className="mt-2">Certifications: {submittedData.certifications}</p>
           <p className="mt-2">Projects: {submittedData.projects}</p>
-          <p className="mt-2">LinkedIn: {submittedData.linkedin}</p>
-          <p className="mt-2">GitHub: {submittedData.github}</p>
 
           <button className="mt-4 bg-green-500 p-2 rounded-md hover:bg-green-600" onClick={handleDownloadPDF}>
             Download as PDF
