@@ -13,9 +13,9 @@ function App() {
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [address, setAddress] = useState("");
   const [education, setEducation] = useState([
-    { school: "", year: "", cgpaOrPercentage: "" },
-    { school: "", year: "", cgpaOrPercentage: "" },
-    { school: "", year: "", cgpaOrPercentage: "" },
+    { school: "", degree: "", year: "", cgpaOrPercentage: "" },
+    { school: "", degree: "", year: "", cgpaOrPercentage: "" },
+    { school: "", degree: "", year: "", cgpaOrPercentage: "" },
   ]);
   const [experience, setExperience] = useState("");
   const [hobbies, setHobbies] = useState("");
@@ -80,9 +80,9 @@ function App() {
     setDateOfBirth("");
     setAddress("");
     setEducation([
-      { school: "", year: "", cgpaOrPercentage: "" },
-      { school: "", year: "", cgpaOrPercentage: "" },
-      { school: "", year: "", cgpaOrPercentage: "" },
+      { school: "", degree: "", year: "", cgpaOrPercentage: "" },
+      { school: "", degree: "", year: "", cgpaOrPercentage: "" },
+      { school: "", degree: "", year: "", cgpaOrPercentage: "" },
     ]);
     setExperience("");
     setHobbies("");
@@ -153,7 +153,7 @@ function App() {
     doc.line(20, y, 190, y);
     y += 10;
 
-    // Add profile summary
+    // Add profile summary (only if not empty)
     if (submittedData.profileSummary) {
       doc.setFontSize(14);
       doc.text("Profile Summary:", 20, y);
@@ -164,7 +164,7 @@ function App() {
       y += profileSummaryLines.length * 7 + 10;
     }
 
-    // Add skills
+    // Add skills (only if not empty)
     if (submittedData.skills) {
       doc.setFontSize(14);
       doc.text("Skills:", 20, y);
@@ -175,15 +175,17 @@ function App() {
       y += skillsLines.length * 7 + 10;
     }
 
-    // Add education
-    if (submittedData.education.some((edu) => edu.school || edu.year || edu.cgpaOrPercentage)) {
+    // Add education (only if not empty)
+    if (submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)) {
       doc.setFontSize(14);
       doc.text("Education:", 20, y);
       y += 10;
       doc.setFontSize(12);
       submittedData.education.forEach((edu, index) => {
-        if (edu.school || edu.year || edu.cgpaOrPercentage) {
+        if (edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) {
           doc.text(`  ${index + 1}. School/University: ${edu.school}`, 20, y);
+          y += 10;
+          doc.text(`     Degree: ${edu.degree}`, 20, y);
           y += 10;
           doc.text(`     Year: ${edu.year}`, 20, y);
           y += 10;
@@ -297,9 +299,34 @@ function App() {
         <label className="block text-sm font-medium text-gray-700">Education</label>
         {education.map((edu, index) => (
           <div key={index} className="mb-3">
-            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`School/University ${index + 1}`} value={edu.school} onChange={(e) => handleEducationChange(index, "school", e.target.value)} />
-            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`Year ${index + 1}`} value={edu.year} onChange={(e) => handleEducationChange(index, "year", e.target.value)} />
-            <input type="text" className="w-full p-2 border border-gray-300 rounded-md mb-2" placeholder={`CGPA/Percentage ${index + 1}`} value={edu.cgpaOrPercentage} onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)} />
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-md mb-2"
+              placeholder={`School/University ${index + 1}`}
+              value={edu.school}
+              onChange={(e) => handleEducationChange(index, "school", e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-md mb-2"
+              placeholder={`Degree ${index + 1}`}
+              value={edu.degree}
+              onChange={(e) => handleEducationChange(index, "degree", e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-md mb-2"
+              placeholder={`Year ${index + 1}`}
+              value={edu.year}
+              onChange={(e) => handleEducationChange(index, "year", e.target.value)}
+            />
+            <input
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-md mb-2"
+              placeholder={`CGPA/Percentage ${index + 1}`}
+              value={edu.cgpaOrPercentage}
+              onChange={(e) => handleEducationChange(index, "cgpaOrPercentage", e.target.value)}
+            />
           </div>
         ))}
 
@@ -385,12 +412,13 @@ function App() {
             {submittedData.skills && <p className="mt-2">Skills: {submittedData.skills}</p>}
 
             {/* Education Section */}
-            {submittedData.education.some((edu) => edu.school || edu.year || edu.cgpaOrPercentage) && (
+            {submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage) && (
               <>
                 <p className="mt-2">Education:</p>
                 {submittedData.education.map((edu, index) => (
                   <div key={index} className="ml-4">
                     <p>  {index + 1}. School/University: {edu.school}</p>
+                    <p>     Degree: {edu.degree}</p>
                     <p>     Year: {edu.year}</p>
                     <p>     CGPA/Percentage: {edu.cgpaOrPercentage}</p>
                   </div>
