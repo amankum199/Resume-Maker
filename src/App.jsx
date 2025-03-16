@@ -50,7 +50,7 @@ function App() {
 
   // Handle form submission
   const handleSubmit = () => {
-    setSubmittedData({
+    const data = {
       name,
       profileSummary,
       skills,
@@ -67,7 +67,9 @@ function App() {
       linkedin: linkedin.startsWith("http") ? linkedin : `https://${linkedin}`,
       github: github.startsWith("http") ? github : `https://${github}`,
       profilePic,
-    });
+    };
+    setSubmittedData(data);
+    console.log("Submitted Data:", data); // Debugging: Log submitted data
     setError("");
   };
 
@@ -106,180 +108,188 @@ function App() {
 
   // Generate and download PDF
   const handleDownloadPDF = () => {
-    if (!submittedData) return;
-
-    const doc = new jsPDF();
-    let y = 20; // Vertical position for content
-
-    // Function to add a new page if content overflows
-    const addNewPageIfNeeded = () => {
-      if (y > 280) {
-        doc.addPage();
-        y = 20; // Reset y position for the new page
+    try {
+      if (!submittedData) {
+        setError("No data submitted. Please fill the form and submit first.");
+        return;
       }
-    };
 
-    // Add profile picture to PDF
-    if (submittedData.profilePic) {
-      doc.addImage(submittedData.profilePic, "JPEG", 20, y, 40, 40);
-    }
+      const doc = new jsPDF();
+      let y = 20; // Vertical position for content
 
-    // Add name and contact details
-    doc.setFontSize(16);
-    doc.text(submittedData.name, 70, y + 10);
-    doc.setFontSize(12);
-    y += 20;
+      // Function to add a new page if content overflows
+      const addNewPageIfNeeded = () => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20; // Reset y position for the new page
+        }
+      };
 
-    // Add email, contact, address, LinkedIn, and GitHub without icons or labels
-    if (submittedData.email) {
-      doc.text(`${submittedData.email}`, 70, y);
-      y += 10;
-    }
-    if (submittedData.contact) {
-      doc.text(`${submittedData.contact}`, 70, y);
-      y += 10;
-    }
-    if (submittedData.address) {
-      doc.text(`${submittedData.address}`, 70, y);
-      y += 10;
-    }
-    if (submittedData.linkedin) {
-      doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
-      doc.setTextColor(0, 0, 0);
-      y += 10;
-    }
-    if (submittedData.github) {
-      doc.setTextColor(0, 0, 255);
-      doc.textWithLink(`${submittedData.github}`, 70, y, { url: submittedData.github });
-      doc.setTextColor(0, 0, 0);
-      y += 10;
-    }
+      // Add profile picture to PDF
+      if (submittedData.profilePic) {
+        doc.addImage(submittedData.profilePic, "JPEG", 20, y, 40, 40);
+      }
 
-    // Add a horizontal line
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.5);
-    doc.line(20, y, 190, y);
-    y += 10;
-
-    // Add profile summary (only if not empty)
-    if (submittedData.profileSummary) {
-      doc.setFontSize(14);
-      doc.text("Profile Summary:", 20, y);
-      y += 10;
+      // Add name and contact details
+      doc.setFontSize(16);
+      doc.text(submittedData.name, 70, y + 10);
       doc.setFontSize(12);
-      const profileSummaryLines = doc.splitTextToSize(submittedData.profileSummary, 170);
-      doc.text(profileSummaryLines, 20, y);
-      y += profileSummaryLines.length * 7 + 10;
-      addNewPageIfNeeded();
-    }
+      y += 20;
 
-    // Add skills (only if not empty)
-    if (submittedData.skills) {
-      doc.setFontSize(14);
-      doc.text("Skills:", 20, y);
+      // Add email, contact, address, LinkedIn, and GitHub without icons or labels
+      if (submittedData.email) {
+        doc.text(`${submittedData.email}`, 70, y);
+        y += 10;
+      }
+      if (submittedData.contact) {
+        doc.text(`${submittedData.contact}`, 70, y);
+        y += 10;
+      }
+      if (submittedData.address) {
+        doc.text(`${submittedData.address}`, 70, y);
+        y += 10;
+      }
+      if (submittedData.linkedin) {
+        doc.setTextColor(0, 0, 255);
+        doc.textWithLink(`${submittedData.linkedin}`, 70, y, { url: submittedData.linkedin });
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+      }
+      if (submittedData.github) {
+        doc.setTextColor(0, 0, 255);
+        doc.textWithLink(`${submittedData.github}`, 70, y, { url: submittedData.github });
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+      }
+
+      // Add a horizontal line
+      doc.setDrawColor(0);
+      doc.setLineWidth(0.5);
+      doc.line(20, y, 190, y);
       y += 10;
-      doc.setFontSize(12);
-      const skillsLines = doc.splitTextToSize(submittedData.skills, 170);
-      doc.text(skillsLines, 20, y);
-      y += skillsLines.length * 7 + 10;
-      addNewPageIfNeeded();
+
+      // Add profile summary (only if not empty)
+      if (submittedData.profileSummary) {
+        doc.setFontSize(14);
+        doc.text("Profile Summary:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const profileSummaryLines = doc.splitTextToSize(submittedData.profileSummary, 170);
+        doc.text(profileSummaryLines, 20, y);
+        y += profileSummaryLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add skills (only if not empty)
+      if (submittedData.skills) {
+        doc.setFontSize(14);
+        doc.text("Skills:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const skillsLines = doc.splitTextToSize(submittedData.skills, 170);
+        doc.text(skillsLines, 20, y);
+        y += skillsLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add education in table format (only if not empty)
+      if (submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)) {
+        doc.setFontSize(14);
+        doc.text("Education:", 20, y);
+        y += 10;
+
+        // Prepare data for the table
+        const educationData = submittedData.education
+          .filter((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)
+          .map((edu, index) => [
+            index + 1,
+            edu.school,
+            edu.degree,
+            edu.year,
+            edu.cgpaOrPercentage,
+          ]);
+
+        // Generate the table
+        doc.autoTable({
+          startY: y,
+          head: [["#", "School/University", "Degree", "Year", "CGPA/Percentage"]],
+          body: educationData,
+          theme: "grid",
+        });
+
+        y = doc.lastAutoTable.finalY + 10; // Update y position after the table
+        addNewPageIfNeeded();
+      }
+
+      // Add experience (only if not empty)
+      if (submittedData.experience) {
+        doc.setFontSize(14);
+        doc.text("Experience:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const experienceLines = doc.splitTextToSize(submittedData.experience, 170);
+        doc.text(experienceLines, 20, y);
+        y += experienceLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add hobbies (only if not empty)
+      if (submittedData.hobbies) {
+        doc.setFontSize(14);
+        doc.text("Hobbies:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const hobbiesLines = doc.splitTextToSize(submittedData.hobbies, 170);
+        doc.text(hobbiesLines, 20, y);
+        y += hobbiesLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add languages (only if not empty)
+      if (submittedData.languages) {
+        doc.setFontSize(14);
+        doc.text("Languages:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const languagesLines = doc.splitTextToSize(submittedData.languages, 170);
+        doc.text(languagesLines, 20, y);
+        y += languagesLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add certifications (only if not empty)
+      if (submittedData.certifications) {
+        doc.setFontSize(14);
+        doc.text("Certifications:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const certificationsLines = doc.splitTextToSize(submittedData.certifications, 170);
+        doc.text(certificationsLines, 20, y);
+        y += certificationsLines.length * 7 + 10;
+        addNewPageIfNeeded();
+      }
+
+      // Add projects (only if not empty)
+      if (submittedData.projects) {
+        doc.setFontSize(14);
+        doc.text("Projects:", 20, y);
+        y += 10;
+        doc.setFontSize(12);
+        const projectsLines = doc.splitTextToSize(submittedData.projects, 170);
+        doc.text(projectsLines, 20, y);
+      }
+
+      // Save the PDF
+      doc.save("Introduction.pdf");
+    } catch (error) {
+      console.error("Error generating PDF:", error); // Debugging: Log any errors
+      setError("An error occurred while generating the PDF. Please try again.");
     }
-
-    // Add education in table format (only if not empty)
-    if (submittedData.education.some((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)) {
-      doc.setFontSize(14);
-      doc.text("Education:", 20, y);
-      y += 10;
-
-      // Prepare data for the table
-      const educationData = submittedData.education
-        .filter((edu) => edu.school || edu.degree || edu.year || edu.cgpaOrPercentage)
-        .map((edu, index) => [
-          index + 1,
-          edu.school,
-          edu.degree,
-          edu.year,
-          edu.cgpaOrPercentage,
-        ]);
-
-      // Generate the table
-      doc.autoTable({
-        startY: y,
-        head: [["#", "School/University", "Degree", "Year", "CGPA/Percentage"]],
-        body: educationData,
-        theme: "grid",
-      });
-
-      y = doc.lastAutoTable.finalY + 10; // Update y position after the table
-      addNewPageIfNeeded();
-    }
-
-    // Add experience (only if not empty)
-    if (submittedData.experience) {
-      doc.setFontSize(14);
-      doc.text("Experience:", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      const experienceLines = doc.splitTextToSize(submittedData.experience, 170);
-      doc.text(experienceLines, 20, y);
-      y += experienceLines.length * 7 + 10;
-      addNewPageIfNeeded();
-    }
-
-    // Add hobbies (only if not empty)
-    if (submittedData.hobbies) {
-      doc.setFontSize(14);
-      doc.text("Hobbies:", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      const hobbiesLines = doc.splitTextToSize(submittedData.hobbies, 170);
-      doc.text(hobbiesLines, 20, y);
-      y += hobbiesLines.length * 7 + 10;
-      addNewPageIfNeeded();
-    }
-
-    // Add languages (only if not empty)
-    if (submittedData.languages) {
-      doc.setFontSize(14);
-      doc.text("Languages:", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      const languagesLines = doc.splitTextToSize(submittedData.languages, 170);
-      doc.text(languagesLines, 20, y);
-      y += languagesLines.length * 7 + 10;
-      addNewPageIfNeeded();
-    }
-
-    // Add certifications (only if not empty)
-    if (submittedData.certifications) {
-      doc.setFontSize(14);
-      doc.text("Certifications:", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      const certificationsLines = doc.splitTextToSize(submittedData.certifications, 170);
-      doc.text(certificationsLines, 20, y);
-      y += certificationsLines.length * 7 + 10;
-      addNewPageIfNeeded();
-    }
-
-    // Add projects (only if not empty)
-    if (submittedData.projects) {
-      doc.setFontSize(14);
-      doc.text("Projects:", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      const projectsLines = doc.splitTextToSize(submittedData.projects, 170);
-      doc.text(projectsLines, 20, y);
-    }
-
-    // Save the PDF
-    doc.save("Resume.pdf");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Resume</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Introduction</h1>
 
       {/* Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
