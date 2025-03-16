@@ -256,12 +256,12 @@ function App() {
     }
 
     // Save the PDF
-    doc.save("Introduction.pdf");
+    doc.save("Resume.pdf");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10 px-4">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Introduction</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Your Resume</h1>
 
       {/* Input Form */}
       <div className="bg-white shadow-lg rounded-lg p-6 w-full max-w-lg">
